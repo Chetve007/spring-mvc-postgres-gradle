@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import ru.alex.project.springapp.service.UserService;
 
-
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
