@@ -1,16 +1,22 @@
 package ru.alex.project.springapp.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import ru.alex.project.springapp.entities.Message;
 import ru.alex.project.springapp.entities.User;
 import ru.alex.project.springapp.repositories.MessageRepo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class MainPageController {
@@ -18,8 +24,11 @@ public class MainPageController {
     @Autowired
     private MessageRepo messageRepo;
 
+    @Value("${upload.path}")
+    private String uploadPath;
+
 //    @GetMapping("/")
-//    public String getMainPage(@RequestParam(name="name", required = false, defaultValue = "Cyka") String name,
+//    public String getMainPage(@RequestParam(name="name", required = false, defaultValue = "Lexa") String name,
 //                              Map<String, Object> model) {
 //        model.put("name", name);
 //        return "greeting";
@@ -31,9 +40,16 @@ public class MainPageController {
     }
 
     @GetMapping("/main")
-    public String getMainPage(Map<String, Object> model) {
-        Iterable<Message> messages = messageRepo.findAll();
-        model.put("messages", messages);
+    public String getMainPage(@RequestParam(required = false, defaultValue = "") String filter, Model model) {
+        Iterable<Message> messages;
+
+        if (filter != null && !filter.isEmpty())
+            messages = messageRepo.findByTag(filter);
+        else
+            messages = messageRepo.findAll();
+
+        model.addAttribute("messages", messages);
+        model.addAttribute("filter", filter);
         return "main";
     }
 
@@ -42,24 +58,27 @@ public class MainPageController {
             @AuthenticationPrincipal User user,
             @RequestParam String text,
             @RequestParam String tag,
-            Map<String, Object> model)
-    {
+            Map<String, Object> model,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
         Message message = new Message(text, tag, user);
+
+        if (file != null && !file.getOriginalFilename().isEmpty()) {
+            File uploadDir = new File(uploadPath);
+
+            if (!uploadDir.exists())
+                uploadDir.mkdir();
+
+            String uuidFile = UUID.randomUUID().toString();
+            String resultFileName = uuidFile + "." + file.getOriginalFilename();
+
+            file.transferTo(new File(uploadPath + "/" + resultFileName));
+
+            message.setFilename(resultFileName);
+        }
+
         messageRepo.save(message);
         Iterable<Message> messages = messageRepo.findAll();
-        model.put("messages", messages);
-        return "main";
-    }
-
-    @PostMapping("filter")
-    public String filter(@RequestParam String filter, Map<String, Object> model) {
-        Iterable<Message> messages;
-
-        if (filter != null && !filter.isEmpty())
-            messages = messageRepo.findByTag(filter);
-        else
-            messages = messageRepo.findAll();
-
         model.put("messages", messages);
         return "main";
     }
