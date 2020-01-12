@@ -2,7 +2,7 @@
 <#import "parts/loginTemp.ftl" as l>
 
 <@c.page>
-    <p>Add new user</p>
+    <div class="mb-3">Добавить пользователя</div>
     ${message?ifExists}
-    <@l.login "/registration" />
+    <@l.login "/registration" true/>
 </@c.page>
