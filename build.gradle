@@ -19,23 +19,23 @@ repositories {
 	mavenCentral()
 }
 
-import org.apache.tools.ant.filters.ReplaceTokens
-processResources {
-	with copySpec {
-		from 'src/main/resources'
-		include '** ** /application** .yml'
-		include '** ** /application** .yaml'
-		include '** ** /application** .properties'
-		include '** ** /loc** .properties'
-		project.properties.findAll().each {
-			prop ->
-				if (prop.value != null) {
-					filter(ReplaceTokens, tokens:[(prop.key): prop.value])
-					filter(ReplaceTokens, tokens:[('project.' + prop.key): prop.value])
-				}
-		}
-	}
-}
+//import org.apache.tools.ant.filters.ReplaceTokens
+//processResources {
+//	with copySpec {
+//		from 'src/main/resources'
+//		include '** ** /application** .yml'
+//		include '** ** /application** .yaml'
+//		include '** ** /application** .properties'
+//		include '** ** /loc** .properties'
+//		project.properties.findAll().each {
+//			prop ->
+//				if (prop.value != null) {
+//					filter(ReplaceTokens, tokens:[(prop.key): prop.value])
+//					filter(ReplaceTokens, tokens:[('project.' + prop.key): prop.value])
+//				}
+//		}
+//	}
+//}
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -45,6 +45,7 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	compile ("org.springframework.boot:spring-boot-starter-security")
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.2.2.RELEASE'
+	compile group: 'org.flywaydb', name: 'flyway-core', version: '6.0.8'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
