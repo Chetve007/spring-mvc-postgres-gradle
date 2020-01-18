@@ -2,33 +2,31 @@ package ru.alex.project.springapp.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.alex.project.springapp.entities.Role;
 import ru.alex.project.springapp.entities.User;
-import ru.alex.project.springapp.repositories.UserRepo;
+import ru.alex.project.springapp.service.UserService;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
 
 @Controller
 @RequestMapping("/user")
-@PreAuthorize("hasAuthority('ADMIN')")
 public class UserController {
 
     @Autowired
-    private UserRepo userRepo;
+    private UserService userService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public String userList(Model model) {
-        model.addAttribute("users", userRepo.findAll());
+        model.addAttribute("users", userService.findAll());
         return "userList";
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("{user}")
     public String userEditForm(@PathVariable User user, Model model) {
         model.addAttribute("user", user);
@@ -36,25 +34,35 @@ public class UserController {
         return "userEdit";
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public String saveUser(
             @RequestParam String username,
             @RequestParam Map<String, String> form,
             @RequestParam("userId") User user
             ) {
-        user.setUsername(username);
 
-        Set<String> roles = Arrays.stream(Role.values())
-                .map(Role::name)
-                .collect(toSet());
+        userService.saveUser(user, username, form);
 
-        user.getRoles().clear();
-
-        form.keySet().stream()
-                .filter(key -> roles.contains(key))
-                .forEach(key -> user.getRoles().add(Role.valueOf(key)));
-
-        userRepo.save(user);
         return "redirect:/user";
     }
+
+    @GetMapping("profile")
+    public String getProfile(Model model, @AuthenticationPrincipal User user) {
+        model.addAttribute("username", user.getUsername());
+        model.addAttribute("email", user.getEmail());
+        return "profile";
+    }
+
+    @PostMapping("profile")
+    public String updateProfile(
+            @AuthenticationPrincipal User user,
+            @RequestParam String password,
+            @RequestParam String email
+    ) {
+        userService.updateProfile(user, password, email);
+
+        return "redirect:/user/profile";
+    }
+
 }
