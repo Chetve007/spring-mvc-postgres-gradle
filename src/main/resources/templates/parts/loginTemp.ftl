@@ -31,7 +31,7 @@
             <label class="col-sm-2 col-form-label">Пароль: </label>
             <div class="col-sm-6">
                 <input type="password" name="password2"
-                       class="form-control ${(password2Error??)?string('is-invalid', '')}" placeholder="Повторите пароль" />
+                       class="form-control ${(password2Error??)?string('is-invalid', '')}" placeholder="Подтвердите пароль" />
                 <#if password2Error??>
                     <div class="invalid-feedback">
                         ${password2Error}
