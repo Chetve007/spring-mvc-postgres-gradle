@@ -1,6 +1,9 @@
 package ru.alex.project.springapp.entities;
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 public class Message {
@@ -9,7 +12,11 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @NotBlank(message = "Message cannot be empty")
+    @Length(max = 2048, message = "It's a very long message (more than 2kB)")
     private String text;
+
+    @Length(max = 255, message = "It's a very long tag (more than 255)")
     private String tag;
 
     @ManyToOne(fetch = FetchType.EAGER)
