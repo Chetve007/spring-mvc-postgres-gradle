@@ -1,6 +1,7 @@
 package ru.alex.project.springapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Value("${hostname}")
+    private String hostname;
 
     public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -61,8 +65,9 @@ public class UserService implements UserDetailsService {
         if (! user.getEmail().isEmpty()) {
             String message = format(
                     "Hello, %s! \n" +
-                            "Welcome to Lexa's. Please, visit next link: http://localhost:8080/activate/%s",
+                            "Welcome to Lexa's. Please, visit next link: http://%s/activate/%s",
                     user.getUsername(),
+                    hostname,
                     user.getActivationCode());
 
             mailSender.send(user.getEmail(), "Activation code", message);
