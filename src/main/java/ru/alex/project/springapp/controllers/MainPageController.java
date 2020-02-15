@@ -91,4 +91,23 @@ public class MainPageController {
         model.addAttribute("messages", messages);
         return "main";
     }
+
+    protected void saveFile(
+            @Valid Message message,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        if (file != null && !file.getOriginalFilename().isEmpty()) {
+            File uploadDir = new File(uploadPath);
+
+            if (!uploadDir.exists())
+                uploadDir.mkdir();
+
+            String uuidFile = UUID.randomUUID().toString();
+            String resultFileName = uuidFile + "." + file.getOriginalFilename();
+
+            file.transferTo(new File(uploadPath + "/" + resultFileName));
+
+            message.setFilename(resultFileName);
+        }
+    }
 }
